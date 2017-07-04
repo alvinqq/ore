@@ -21,11 +21,6 @@
 		</dependency>
 		
 		 <dependency>
-			<groupId>org.oreframework.boot</groupId>
-			<artifactId>ore-boot-web</artifactId>
-		</dependency>
-		
-		 <dependency>
 			<groupId>org.oreframework</groupId>
 			<artifactId>ore-web</artifactId>
 		</dependency>

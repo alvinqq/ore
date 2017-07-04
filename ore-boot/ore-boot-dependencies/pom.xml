@@ -39,12 +39,6 @@
 			
 			<dependency>
 				<groupId>org.oreframework.boot</groupId>
-				<artifactId>ore-boot-web</artifactId>
-				<version>1.0.8.RELEASE</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.oreframework.boot</groupId>
 				<artifactId>ore-boot-autoconfigure</artifactId>
 				<version>1.0.8.RELEASE</version>
 			</dependency>
