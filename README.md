@@ -1,9 +1,1 @@
-ore-boot-starter-cas 
-ore-boot-starter-datasource 
-ore-boot-starter-diamond 
-ore-boot-starter-dubbo 
-ore-boot-starter-kafka 
-ore-boot-starter-office 
-ore-boot-starter-redis 
-ore-boot-starter-static 
-ore-boot-starter-wechat 
+该框架为web工程,集成了spring boot,dubbo,redis,kafka,阿里diamond,mybatis,目前支持3个数据源配置
