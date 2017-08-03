@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.oreframework</groupId>
-	<version>2.0.7.RELEASE</version>
+	<version>2.0.8.RELEASE</version>
 	<artifactId>ore-dependencies</artifactId>
 	<name>Ore Dependencies</name>
 	<description>Ore Dependencies</description>
@@ -32,92 +32,101 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- Ore Framework -->
-			
-			
+			<dependency>
+				<groupId>org.oreframework</groupId>
+				<artifactId>ore-crawler</artifactId>
+				<version>2.0.8.RELEASE</version>
+			</dependency>
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-util</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-web</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-context</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-beanutils</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-office</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-log</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-math</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-imaging</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-dbutils</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-entity</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-lang</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework.common</groupId>
 				<artifactId>ore-common-compress</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-wechat</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-datasource</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-redis</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.oreframework</groupId>
 				<artifactId>ore-kafka</artifactId>
-				<version>2.0.7.RELEASE</version>
+				<version>2.0.8.RELEASE</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>org.oreframework.generator</groupId>
+				<artifactId>ore-rapid-generator</artifactId>
+				<version>2.0.8.RELEASE</version>
+			</dependency>
+
 			<!-- Third Party -->
 
 			<dependency>
@@ -476,6 +485,21 @@
 				<version>1.8.6</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.bookegou</groupId>
+				<artifactId>rop</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.zbj.zop</groupId>
+				<artifactId>rop-client</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.woodstox</groupId>
+				<artifactId>stax2-api</artifactId>
+				<version>4.0.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

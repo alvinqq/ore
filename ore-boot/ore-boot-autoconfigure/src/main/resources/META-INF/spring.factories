@@ -25,7 +25,8 @@ org.oreframework.boot.autoconfigure.datasource.customize.mybatis.pagehelper.Seco
 org.oreframework.boot.autoconfigure.context.SpringContextAutoConfigure,\
 org.oreframework.boot.autoconfigure.kafka.KafkaAutoConfiguration,\
 org.oreframework.boot.autoconfigure.redis.RedisAutoConfiguration,\
-org.oreframework.boot.autoconfigure.cas.CasSecurityAutoConfigure
+org.oreframework.boot.autoconfigure.cas.CasSecurityAutoConfigure,\
+org.oreframework.boot.autoconfigure.rop.RapidOpenPlatformAutoConfigure
 
 #org.oreframework.boot.autoconfigure.datasource.mybatis.multi.primary.MyBatisMapperScannerConfig
 #org.oreframework.boot.autoconfigure.datasource.mybatis.multi.secondary.MyBatisMapperScannerConfig

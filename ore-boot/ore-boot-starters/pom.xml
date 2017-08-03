@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.oreframework.boot</groupId>
 		<artifactId>ore-boot-parent</artifactId>
-		<version>1.0.8.RELEASE</version>
+		<version>1.0.9.RELEASE</version>
 		<relativePath>../ore-boot-parent</relativePath>
 	</parent>
 	<artifactId>ore-boot-starters</artifactId>
@@ -26,6 +26,7 @@
 		<module>ore-boot-starter-redis</module>
 		<module>ore-boot-starter-cas</module>
 		<module>ore-boot-starter-office</module>
+		<module>ore-boot-starter-rop</module>
 	</modules>
 	
 	<distributionManagement>
