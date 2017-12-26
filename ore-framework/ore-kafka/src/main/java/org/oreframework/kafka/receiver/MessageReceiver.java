@@ -46,12 +46,12 @@ public abstract class MessageReceiver
     /**
      * topic
      */
-    // protected String topic;
+    protected String topic;
     
     /**
      * nThreads
      */
-    //protected String consumerThreads;
+    protected String consumerThreads;
     
     /**
      * connector
@@ -80,13 +80,13 @@ public abstract class MessageReceiver
         
         connector = Consumer.createJavaConsumerConnector(consumerConfig);
         int threadCnt = 1;
-        String consumerThreads = kafkaProperties.getProperties().get("nThreads");
+        consumerThreads = kafkaProperties.getProperties().get("nThreads");
         
         if (null != consumerThreads && Integer.parseInt(consumerThreads) > 0)
         {
             threadCnt = Integer.parseInt(consumerThreads);
         }
-        String topic = kafkaProperties.getProperties().get("topic");
+        topic = kafkaProperties.getProperties().get("topic");
         String[] topics = topic.trim().split(",");
         for (int i = 0; i < topics.length; i++)
         {
