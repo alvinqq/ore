@@ -4,11 +4,12 @@
 	<parent>
 		<groupId>org.oreframework.boot</groupId>
 		<artifactId>ore-boot-starters</artifactId>
-		<version>1.0.10-SNAPSHOT</version>
+		<version>1.0.9.RELEASE</version>
 	</parent>
-	<artifactId>ore-boot-starter-redis</artifactId>
-	<name>Ore Boot Redis Starter</name>
-	<description>Ore Boot Redis Starter</description>
+	<artifactId>ore-boot-starter-rop</artifactId>
+	<name>Ore Boot Kafka Starter</name>
+	<description>Ore Boot ROP Starter</description>
+
 	<properties>
 		<main.basedir>${basedir}/../..</main.basedir>
 	</properties>
@@ -18,14 +19,17 @@
 			<artifactId>ore-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>stax2-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.oreframework</groupId>
-			<artifactId>ore-redis</artifactId>
+			<groupId>com.bookegou</groupId>
+			<artifactId>rop</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.zbj.zop</groupId>
+			<artifactId>rop-client</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

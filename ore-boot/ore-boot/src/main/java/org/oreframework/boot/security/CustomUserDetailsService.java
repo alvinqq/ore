@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  * @author huangzz
  * 2017年3月19日
  */
-public class CustomUserDetailsService /*
-	//实现UserDetailsService接口，实现loadUserByUsername方法
+public class CustomUserDetailsService 
+	/*//实现UserDetailsService接口，实现loadUserByUsername方法
 	implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -38,7 +38,7 @@ public class CustomUserDetailsService /*
 	@Override
 	public UserDetails loadUserDetails(CasAssertionAuthenticationToken token) throws UsernameNotFoundException {
 		//System.out.println("当前的用户名是："+token.getName());
-		/*这里我为了方便，就直接返回一个用户信息，实际当中这里修改为查询数据库或者调用服务什么的来获取用户信息*/
+		//这里我为了方便，就直接返回一个用户信息，实际当中这里修改为查询数据库或者调用服务什么的来获取用户信息
 		UserInfo userInfo = new UserInfo();
 		userInfo.setUsername(token.getAssertion().getPrincipal().getAttributes().get("realname").toString());
 		userInfo.setName(token.getName());

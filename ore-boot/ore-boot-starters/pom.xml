@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.oreframework.boot</groupId>
 		<artifactId>ore-boot-parent</artifactId>
-		<version>1.0.9.RELEASE</version>
+		<version>1.0.10-SNAPSHOT</version>
 		<relativePath>../ore-boot-parent</relativePath>
 	</parent>
 	<artifactId>ore-boot-starters</artifactId>

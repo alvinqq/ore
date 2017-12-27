@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.oreframework.boot</groupId>
 		<artifactId>ore-boot-starters</artifactId>
-		<version>1.0.9.RELEASE</version>
+		<version>1.0.10-SNAPSHOT</version>
 	</parent>
 	<artifactId>ore-boot-starter-diamond</artifactId>
 	<name>Ore Boot Diamond Starter</name>
@@ -23,29 +23,6 @@
 		<dependency>
 			<groupId>com.taobao.diamond</groupId>
 			<artifactId>diamond-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>dubbo</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.alibaba</groupId>
-					<artifactId>fastjson</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
