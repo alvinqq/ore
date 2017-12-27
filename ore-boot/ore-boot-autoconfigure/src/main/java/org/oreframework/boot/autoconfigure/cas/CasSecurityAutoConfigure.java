@@ -1,152 +1,210 @@
 package org.oreframework.boot.autoconfigure.cas;
 
+import org.jasig.cas.client.authentication.AuthenticationFilter;
 import org.jasig.cas.client.session.SingleSignOutFilter;
-import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
+import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
+import org.jasig.cas.client.util.AssertionThreadLocalFilter;
+import org.jasig.cas.client.util.HttpServletRequestWrapperFilter;
+import org.jasig.cas.client.validation.AbstractTicketValidationFilter;
+import org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter;
 import org.oreframework.boot.autoconfigure.cas.config.AppProperties;
 import org.oreframework.boot.autoconfigure.cas.config.CasProperties;
-import org.oreframework.boot.security.CustomUserDetailsService;
+import org.oreframework.boot.security.cas.CasFilter;
+import org.oreframework.boot.security.UserCache;
+import org.oreframework.boot.security.UserInfoHolder;
+import org.oreframework.boot.security.cas.AppAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.cas.ServiceProperties;
-import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
-import org.springframework.security.cas.authentication.CasAuthenticationProvider;
-import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
-import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 /**
- * @author huangzz
- * 2017年3月19日
+ * @author huangzz 2017年3月19日
  */
 @Configuration
-@ConditionalOnClass(WebSecurityConfigurerAdapter.class)
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnableConfigurationProperties({CasProperties.class,AppProperties.class})
-public class CasSecurityAutoConfigure extends WebSecurityConfigurerAdapter {
-    
-    @Autowired
-    private CasProperties casProperties;
-    
-    @Autowired
-    private AppProperties appProperties;
+@EnableCaching
+@ConditionalOnClass(AbstractTicketValidationFilter.class)
+@EnableConfigurationProperties({ CasProperties.class, AppProperties.class })
+public class CasSecurityAutoConfigure {
 
-    /** 定义安全策略 */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()// 配置安全策略
-                // .antMatchers("/","/hello").permitAll()//定义/请求不需要验证
-                .anyRequest().authenticated()// 其余的所有请求都需要验证
-                .and().logout().permitAll()// 定义logout不需要验证
-                .and().formLogin();// 使用form表单登录
+	@Autowired
+	private CasProperties casProperties;
 
-        http.exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint()).and()
-                .addFilter(casAuthenticationFilter()).addFilterBefore(casLogoutFilter(), LogoutFilter.class)
-                .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
+	@Autowired
+	private AppProperties appProperties;
 
-         http.csrf().disable(); //禁用CSRF
-    }
-    
+	@Bean
+	public UserCache userCache() {
+		UserCache userCache = new UserCache();
+		return userCache;
+	}
+	
+	
+	@Bean
+	public UserInfoHolder userInfoHolder() {
+		UserInfoHolder holder = new UserInfoHolder();
+		return holder;
+	}
+	
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public ServletListenerRegistrationBean<SingleSignOutHttpSessionListener> singleSignOutHttpSessionListener() {
+		SingleSignOutHttpSessionListener listener = new SingleSignOutHttpSessionListener();
+		ServletListenerRegistrationBean<SingleSignOutHttpSessionListener> bean = new ServletListenerRegistrationBean<SingleSignOutHttpSessionListener>();
+		bean.setListener(listener);
+		return bean;
+	}
 
-    /** 定义认证用户信息获取来源，密码校验规则等 */
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        super.configure(auth);
-        auth.authenticationProvider(casAuthenticationProvider());
-        // inMemoryAuthentication 从内存中获取
-        // auth.inMemoryAuthentication().withUser("chengli").password("123456").roles("USER")
-        // .and().withUser("admin").password("123456").roles("ADMIN");
+	/**
+	 * 该过滤器用于实现单点登出功能，可选配置
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean singleSignOutFilter() {
 
-        // jdbcAuthentication从数据库中获取，但是默认是以security提供的表结构
-        // usersByUsernameQuery 指定查询用户SQL
-        // authoritiesByUsernameQuery 指定查询权限SQL
-        // auth.jdbcAuthentication().dataSource(dataSource).usersByUsernameQuery(query).authoritiesByUsernameQuery(query);
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		SingleSignOutFilter singleSignOutFilter = new SingleSignOutFilter();
+		registration.setFilter(singleSignOutFilter);
+		registration.addInitParameter("casServerLoginUrl", casProperties.getServerLoginUrl());
+		registration.addInitParameter("service", appProperties.getServerUrl());
+		registration.setName("CAS Single Sign Out Filter");
+		registration.addUrlPatterns("/*");
+		registration.addInitParameter("casServerUrlPrefix", casProperties.getServerUrl());
+		// registration.setOrder(1);
+		return registration;
+	}
 
-        // 注入userDetailsService，需要实现userDetailsService接口
-        // auth.userDetailsService(userDetailsService);
-    }
+	/**
+	 * 该过滤器负责用户的认证工作，必须启用它
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean authenticationFilter() {
 
-    /** 认证的入口 */
-    @Bean
-    public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
-        CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-        casAuthenticationEntryPoint.setLoginUrl(casProperties.getServerLoginUrl());
-        casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
-        return casAuthenticationEntryPoint;
-    }
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+		registration.setFilter(authenticationFilter);
+		registration.setName("AuthenticationFilter");
+		registration.addUrlPatterns("/*");
+		registration.addInitParameter("casServerLoginUrl", casProperties.getServerLoginUrl());
+		registration.addInitParameter("ignorePattern", appProperties.getIgnorePattern());
+		// registration.addInitParameter("serverName",
+		// casProperties.getServerUrl());
+		registration.addInitParameter("service", appProperties.getServerUrl());
+		registration.addInitParameter("encoding", "UTF-8");
+		return registration;
+	}
 
-    /** 指定service相关信息 */
-    @Bean
-    public ServiceProperties serviceProperties() {
-        ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService(appProperties.getServerUrl()+ appProperties.getLoginUrl());
-        serviceProperties.setAuthenticateAllArtifacts(true);
-        return serviceProperties;
-    }
+	/**
+	 * 该过滤器负责对Ticket的校验工作，必须启用它
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean cas20ProxyReceivingTicketValidationFilter() {
 
-    /** CAS认证过滤器 */
-    @Bean
-    public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-        CasAuthenticationFilter casAuthenticationFilter = new CasAuthenticationFilter();
-        casAuthenticationFilter.setAuthenticationManager(authenticationManager());
-        casAuthenticationFilter.setFilterProcessesUrl(appProperties.getLoginUrl());
-        return casAuthenticationFilter;
-    }
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		Cas20ProxyReceivingTicketValidationFilter ticketValidationFilter = new Cas20ProxyReceivingTicketValidationFilter();
+		registration.setFilter(ticketValidationFilter);
+		registration.setName("CAS Validation Filter");
+		registration.addUrlPatterns("/*");
+		registration.addInitParameter("casServerUrlPrefix", casProperties.getServerUrl());
+		registration.addInitParameter("proxyReceptorUrl", casProperties.getServerUrl());
+		registration.addInitParameter("casServerLoginUrl", casProperties.getServerLoginUrl());
+		registration.addInitParameter("service", appProperties.getServerUrl());
+		registration.addInitParameter("ignorePattern", appProperties.getIgnorePattern());
+		// registration.addInitParameter("serverName",
+		// casProperties.getServerUrl());
+		registration.addInitParameter("useSession", "true");
+		registration.addInitParameter("redirectAfterValidation", "true");
+		registration.addInitParameter("encoding", "UTF-8");
+		return registration;
+	}
 
-    /** cas 认证 Provider */
-    @Bean
-    public CasAuthenticationProvider casAuthenticationProvider() {
-        CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
-        casAuthenticationProvider.setAuthenticationUserDetailsService(customUserDetailsService());
-        // casAuthenticationProvider.setUserDetailsService(customUserDetailsService());
-        // //这里只是接口类型，实现的接口不一样，都可以的。
-        casAuthenticationProvider.setServiceProperties(serviceProperties());
-        casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
-        casAuthenticationProvider.setKey("casAuthenticationProviderKey");
-        return casAuthenticationProvider;
-    }
+	/**
+	 * 该过滤器负责实现HttpServletRequest请求的包裹，
+	 * 比如允许开发者通过HttpServletRequest的getRemoteUser()方法获得SSO登录用户的登录名，可选配置
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean httpServletRequestWrapperFilter() {
 
-    /*
-     * @Bean public UserDetailsService customUserDetailsService(){ return new
-     * CustomUserDetailsService(); }
-     */
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		HttpServletRequestWrapperFilter httpServletRequestWrapperFilter = new HttpServletRequestWrapperFilter();
+		registration.setFilter(httpServletRequestWrapperFilter);
+		registration.setName("CAS HttpServletRequest Wrapper Filter");
+		registration.addInitParameter("casServerLoginUrl", casProperties.getServerLoginUrl());
+		registration.addInitParameter("service", appProperties.getServerUrl());
+		registration.addInitParameter("ignorePattern", appProperties.getIgnorePattern());
+		registration.addUrlPatterns("/*");
+		return registration;
+	}
 
-    /** 用户自定义的AuthenticationUserDetailsService */
-    @Bean
-    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> customUserDetailsService() {
-        return new CustomUserDetailsService();
-    }
+	/**
+	 * 该过滤器使得开发者可以通过org.jasig.cas.client.util.AssertionHolder来获取用户的登录名。
+	 * 比如AssertionHolder.getAssertion().getPrincipal().getName()
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean assertionThreadLocalFilter() {
 
-    @Bean
-    public Cas20ServiceTicketValidator cas20ServiceTicketValidator() {
-        return new Cas20ServiceTicketValidator(casProperties.getServerUrl());
-    }
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		AssertionThreadLocalFilter assertionThreadLocalFilter = new AssertionThreadLocalFilter();
+		registration.setFilter(assertionThreadLocalFilter);
+		registration.setName("CAS Assertion Thread Local Filter");
+		registration.addInitParameter("casServerLoginUrl", casProperties.getServerLoginUrl());
+		registration.addInitParameter("service", appProperties.getServerUrl());
+		registration.addInitParameter("ignorePattern", appProperties.getIgnorePattern());
+		registration.addUrlPatterns("/*");
+		return registration;
+	}
 
-    /** 单点登出过滤器 */
-    @Bean
-    public SingleSignOutFilter singleSignOutFilter() {
-        SingleSignOutFilter singleSignOutFilter = new SingleSignOutFilter();
-        singleSignOutFilter.setCasServerUrlPrefix(casProperties.getServerUrl());
-        singleSignOutFilter.setIgnoreInitConfiguration(true);
-        return singleSignOutFilter;
-    }
+	/**
+	 * 自动根据单点登录的结果设置本系统的用户信息
+	 * 
+	 * @return
+	 */
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.cas", name = "server-login-url")
+	public FilterRegistrationBean casFilter() {
 
-    /** 请求单点退出过滤器 */
-    @Bean
-    public LogoutFilter casLogoutFilter() {
-        LogoutFilter logoutFilter = new LogoutFilter(casProperties.getServerLogoutUrl(),
-                new SecurityContextLogoutHandler());
-        logoutFilter.setFilterProcessesUrl(appProperties.getLogoutUrl());
-        return logoutFilter;
-    }
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		CasFilter casFilter = new CasFilter();
+		registration.setFilter(casFilter);
+		registration.addUrlPatterns("/*");
+		registration.setName("AutoSetUserAdapterFilter");
+		//registration.setOrder(1);
+		return registration;
+	}
+
+	
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.app", name = "boss-url")
+	public FilterRegistrationBean appAuthenticationFilter() {
+
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		AppAuthenticationFilter appAuthenticationFilter = new AppAuthenticationFilter();
+		registration.setFilter(appAuthenticationFilter);
+		registration.addUrlPatterns("/*");
+		registration.addInitParameter("casServerUrlPrefix", casProperties.getServerUrl());
+		registration.addInitParameter("bossUrl", appProperties.getBossUrl());
+		registration.setName("AppAuthenticationFilter");
+		return registration;
+	}
+	
+	
 }

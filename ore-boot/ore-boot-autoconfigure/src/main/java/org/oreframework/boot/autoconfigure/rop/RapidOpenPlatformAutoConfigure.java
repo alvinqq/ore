@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.oreframework.boot.autoconfigure.rop.interceptor.ReservedInterceptor;
+import org.oreframework.boot.autoconfigure.rop.listeners.RopAfterDoServiceEventListener;
+import org.oreframework.boot.autoconfigure.rop.listeners.RopPreDoServiceEventListener;
 import org.oreframework.boot.autoconfigure.rop.metadata.RopProperty;
 import org.oreframework.boot.autoconfigure.rop.security.SecurityAppSecretManager;
 import org.oreframework.context.SpringContext;
@@ -16,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -147,6 +151,8 @@ public class RapidOpenPlatformAutoConfigure {
 		serviceRouter.setSessionManager(sessionManager);
 		serviceRouter.setThreadFerryClass(setThreadFerry());
 		serviceRouter.setInvokeTimesController(invokeTimesController);
+		
+		
 
 		// 注册拦截器
 		ArrayList<Interceptor> interceptors = getInterceptors();
@@ -285,12 +291,36 @@ public class RapidOpenPlatformAutoConfigure {
 		SecurityAppSecretManager appSecretManager = new SecurityAppSecretManager();
 		return appSecretManager;
 	}
+	
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.rop", name = "listener")
+	public RopEventListenerHodler preDoServiceEventListener() {
+		RopPreDoServiceEventListener ropEventListener = new RopPreDoServiceEventListener();
+		RopEventListenerHodler listener = new RopEventListenerHodler(ropEventListener);
+		return listener;
+	}
+	
+	@Bean
+	@ConditionalOnProperty(prefix = "ore.rop", name = "listener")
+	public RopEventListenerHodler afterDoServiceEventListener() {
+		RopAfterDoServiceEventListener ropEventListener = new RopAfterDoServiceEventListener();
+		RopEventListenerHodler listener = new RopEventListenerHodler(ropEventListener);
+		return listener;
+	}
 
 	@Bean
 	public ServiceAccessController serviceAccessController() {
 		DefaultServiceAccessController serviceAccessController = new DefaultServiceAccessController();
 		return serviceAccessController;
 	}
+	
+	@Bean
+	public InterceptorHolder reservedInterceptor() {
+		ReservedInterceptor reservedInterceptor = new ReservedInterceptor();
+		InterceptorHolder interceptorHolder = new InterceptorHolder(reservedInterceptor);
+		return interceptorHolder;
+	}
+
 
 	@Bean
 	public InvokeTimesController invokeTimesController() {
